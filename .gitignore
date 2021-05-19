@@ -1,3 +1,9 @@
+build
+obj
+ip-notificator
+
+t
+
 # Prerequisites
 *.d
 
