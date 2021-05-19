@@ -20,33 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <curl/curl.h>
+
 #include "main.h"
-#include "utils.h"
 
-#include "khash.h"
+#define EXTERNAL_IP_PROVIDER "https://myexternalip.com/raw\0"
 
-KHASH_MAP_INIT_STR(map_str, char *)
-extern khash_t(map_str) *h;
-
-void utils_parse_args(int argc, char** argv)
+int http_init()
 {
-    int ret;
-    unsigned k;
-
-    for (int i = 0; i < argc; i++) {
-        if (argv[i][0] == '-') {
-            k = kh_put(map_str, h, argv[i], &ret);
-            kh_val(h, k) = (i + 1 < argc) ? argv[i + 1] : NULL;
-        }
+    int res = -1;
+    curl_global_init(CURL_GLOBAL_ALL);
+    if (res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return -1;
     }
+    return 0;
 }
 
-void utils_print_help(void)
+void http_cleanup()
 {
-    printf("%s [options]\n", APP_NAME);
-    printf("options:\n");
-    printf("\n");
-    printf("%s: help\n", HELP);
-    printf("%s: verbose, verbose: %d\n", VERBOSE, VERBOSE_DEF);
-    exit(0);
+    curl_global_cleanup();
+}
+
+
+int http_get_ip(app_state_t *app)
+{
+    int res = -1;
+
+    CURL *curl = curl_easy_init();
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, EXTERNAL_IP_PROVIDER);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+        if(res != CURLE_OK)
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+
+        curl_easy_cleanup(curl);
+        return 0;
+    }
+    else {
+        fprintf(stderr, "curl_easy_init() failed: %s\n", curl_easy_strerror(res));
+    }
+    return -1;
 }
