@@ -42,8 +42,8 @@ void http_cleanup()
     curl_global_cleanup();
 }
 
-unsigned write_data(void *ptr, unsigned size, unsigned nmemb, char* data) {
-    ASSERT_INT(size, >, MAX_STRING, exit);
+int write_data(void *ptr, unsigned size, unsigned nmemb, char* data) {
+    ASSERT_INT(size * nmemb, >, MAX_STRING, exit);
     //DEBUG_INT("write_data nmemb", nmemb);
     memcpy(data, ptr, size * nmemb);
     return size * nmemb;

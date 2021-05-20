@@ -41,15 +41,34 @@ void utils_parse_args(int argc, char** argv)
     }
 }
 
-const char* convert_general_error(int error) {
-    switch (error) {
-        case EDEADLK:
-            return "EDEADLK";
-        case EINVAL:
-            return "EINVAL";
-        case ESRCH:
-            return "ESRCH";
-        default:
-            return "Unknown";
-    }
+const char* get_tmp_dir()
+{
+    const char *tmp = getenv(TMPVAR1);
+    if (tmp == NULL)
+        if ((tmp = getenv(TMPVAR2)) == NULL)
+            tmp = getenv(TMPVAR3);
+
+    return (tmp == NULL)? TMPDEF: tmp;
+}
+
+int read_file(const char *path, char *buffer, int buffer_size, size_t *read)
+{
+    FILE *fstream = fopen(path, "a+");
+    ASSERT_POINTER(fstream, ==, NULL, error)
+
+    size_t read_size = fread(buffer, 1, buffer_size, fstream);
+    if (read_size < buffer_size)
+        buffer[read_size] = 0;
+    else
+        buffer[buffer_size - 1] = 0;
+
+    if (read != NULL)
+        *read = read_size;
+
+    CALL(fclose(fstream), error);
+    return 0;
+
+error:
+    return errno;
+
 }

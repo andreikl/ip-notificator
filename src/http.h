@@ -20,9 +20,9 @@
     } \
 }
 
-#define CURL_CALL_X(...) GET_3RD_ARG(__VA_ARGS__, GENERAL_CALL_2, GENERAL_CALL_1, )
+#define CURL_CALL_X(...) GET_3RD_ARG(__VA_ARGS__, CURL_CALL_2, CURL_CALL_1, )
 
-#define CURL_CALL(...) GENERAL_CALL_X(__VA_ARGS__)(__VA_ARGS__)
+#define CURL_CALL(...) CURL_CALL_X(__VA_ARGS__)(__VA_ARGS__)
 
 
 int http_init();

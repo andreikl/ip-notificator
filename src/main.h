@@ -7,6 +7,11 @@
 #define VERBOSE_DEF 1
 
 #define MAX_STRING 256
+#define TMP_FILE "/ip-notificator.txt"
+#define TMPVAR1 "TMPDIR\0"
+#define TMPVAR2 "TEMP\0"
+#define TMPVAR3 "TMP\0"
+#define TMPDEF "/var/tmp\0"
 
 #include <sysexits.h>// exit codes
 #include <signal.h>  // SIGUSR1
@@ -65,32 +70,39 @@
         value); \
 }
 
-#define GENERAL_CALL_2(call, error) \
+#define CALL_MESSAGE(call, res) \
+{ \
+    fprintf(stderr, "ERROR: "#call" returned error: %s (%d)\n%s:%d - %s\n", \
+        strerror(res), res, __FILE__, __LINE__, __FUNCTION__); \
+}
+
+#define CALL_2(call, error) \
 { \
     int res = call; \
     if (res) { \
-        fprintf(stderr, "ERROR: "#call" returned error: %s(%d)\n%s:%d - %s\n", \
-            convert_general_error(res), res, __FILE__, __LINE__, __FUNCTION__); \
+        CALL_MESSAGE(call, res); \
         goto error; \
     } \
 }
 
-#define GENERAL_CALL_1(call) \
+#define CALL_1(call) \
 { \
     int res = call; \
     if (res) { \
-        fprintf(stderr, "ERROR: "#call" returned error: %s(%d)\n%s:%d - %s\n", \
-            convert_general_error(res), res, __FILE__, __LINE__, __FUNCTION__); \
+        CALL_MESSAGE(call, res); \
     } \
 }
 
-#define GENERAL_CALL_X(...) GET_3RD_ARG(__VA_ARGS__, GENERAL_CALL_2, GENERAL_CALL_1, )
+#define CALL_X(...) GET_3RD_ARG(__VA_ARGS__, CALL_2, CALL_1, )
 
-#define GENERAL_CALL(...) GENERAL_CALL_X(__VA_ARGS__)(__VA_ARGS__)
+#define CALL(...) CALL_X(__VA_ARGS__)(__VA_ARGS__)
 
 
 struct app_state_t {
     char ip[MAX_STRING];
+    char file_path[MAX_STRING];
+    char file_data[MAX_STRING];
+
 };
 
 #endif // main_h

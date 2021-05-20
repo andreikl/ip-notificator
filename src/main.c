@@ -55,10 +55,20 @@ static int main_function()
     struct app_state_t app;
     memset(&app, 0, sizeof(struct app_state_t));
 
-    GENERAL_CALL(http_init(), exit);
+    CALL(http_init(), exit);
 
-    GENERAL_CALL(http_get_ip(&app), cleanup);
+    strcpy(app.file_path, get_tmp_dir());
+    strcat(app.file_path, TMP_FILE);
+    int read;
+    CALL(read_file(app.file_path, app.file_data, sizeof(app.file_data), &read), cleanup);
+
+    CALL(http_get_ip(&app), cleanup);
+
+    int res = strcmp(app.file_data, app.ip); 
     DEBUG_STRING("app.ip", app.ip);
+    DEBUG_STRING("app.file_path", app.file_path);
+    DEBUG_STRING("app.file_data", app.file_data);
+    DEBUG_INT("strcmp", res);
 
 cleanup:
     http_cleanup();

@@ -4,6 +4,6 @@
 
 void utils_parse_args(int argc, char** argv);
 
-const char* convert_general_error(int error);
+const char* get_tmp_dir();
 
 #endif //utils_h
