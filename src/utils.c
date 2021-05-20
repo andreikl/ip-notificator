@@ -41,12 +41,15 @@ void utils_parse_args(int argc, char** argv)
     }
 }
 
-void utils_print_help(void)
-{
-    printf("%s [options]\n", APP_NAME);
-    printf("options:\n");
-    printf("\n");
-    printf("%s: help\n", HELP);
-    printf("%s: verbose, verbose: %d\n", VERBOSE, VERBOSE_DEF);
-    exit(0);
+const char* convert_general_error(int error) {
+    switch (error) {
+        case EDEADLK:
+            return "EDEADLK";
+        case EINVAL:
+            return "EINVAL";
+        case ESRCH:
+            return "ESRCH";
+        default:
+            return "Unknown";
+    }
 }

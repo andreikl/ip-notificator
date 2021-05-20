@@ -23,18 +23,18 @@
 #include <curl/curl.h>
 
 #include "main.h"
+#include "utils.h"
+#include "http.h"
 
 #define EXTERNAL_IP_PROVIDER "https://myexternalip.com/raw\0"
 
 int http_init()
 {
-    int res = -1;
-    curl_global_init(CURL_GLOBAL_ALL);
-    if (res != CURLE_OK) {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        return -1;
-    }
+    CURL_CALL(curl_global_init(CURL_GLOBAL_ALL), exit);
     return 0;
+
+exit:
+    return EAGAIN;
 }
 
 void http_cleanup()
@@ -42,25 +42,42 @@ void http_cleanup()
     curl_global_cleanup();
 }
 
-
-int http_get_ip(app_state_t *app)
-{
-    int res = -1;
-
-    CURL *curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, EXTERNAL_IP_PROVIDER);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-
-        if(res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-
-        curl_easy_cleanup(curl);
-        return 0;
-    }
-    else {
-        fprintf(stderr, "curl_easy_init() failed: %s\n", curl_easy_strerror(res));
-    }
+unsigned write_data(void *ptr, unsigned size, unsigned nmemb, char* data) {
+    ASSERT_INT(size, >, MAX_STRING, exit);
+    //DEBUG_INT("write_data nmemb", nmemb);
+    memcpy(data, ptr, size * nmemb);
+    return size * nmemb;
+exit:
     return -1;
+}
+
+int http_get_ip(struct app_state_t *app)
+{
+    CURL *curl = curl_easy_init();
+    ASSERT_POINTER(curl, ==, NULL, cleanup);
+
+    curl_easy_setopt(curl, CURLOPT_URL, EXTERNAL_IP_PROVIDER);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, app->ip);
+    //char header[MAX_STRING];
+    //curl_easy_setopt(curl, CURLOPT_WRITEHEADER, header);
+
+    CURL_CALL(curl_easy_perform(curl), cleanup);
+
+    unsigned response_code;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+    ASSERT_INT(response_code, !=, 200, cleanup);
+
+    curl_easy_cleanup(curl);
+    return 0;
+
+cleanup:
+    if (curl) {
+        curl_easy_cleanup(curl);
+    }
+
+    return EAGAIN;
 }

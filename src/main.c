@@ -40,9 +40,33 @@ static void signal_handler(int signal_number)
     is_abort = 1;
 }
 
+static void print_help()
+{
+    printf("%s [options]\n", APP_NAME);
+    printf("options:\n");
+    printf("\n");
+    printf("%s: help\n", HELP);
+    printf("%s: verbose, verbose: %d\n", VERBOSE, VERBOSE_DEF);
+    exit(0);
+}
+
 static int main_function()
 {
+    struct app_state_t app;
+    memset(&app, 0, sizeof(struct app_state_t));
+
+    GENERAL_CALL(http_init(), exit);
+
+    GENERAL_CALL(http_get_ip(&app), cleanup);
+    DEBUG_STRING("app.ip", app.ip);
+
+cleanup:
+    http_cleanup();
+
     return EX_OK;
+
+exit:
+    return EX_SOFTWARE;
 }
 
 int main(int argc, char** argv)
@@ -55,7 +79,7 @@ int main(int argc, char** argv)
 
     unsigned k = kh_get(map_str, h, HELP);
     if (k != kh_end(h)) {
-        utils_print_help();
+        print_help();
     }
     else {
         exit_code = main_function();

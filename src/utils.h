@@ -3,6 +3,7 @@
 #define utils_h
 
 void utils_parse_args(int argc, char** argv);
-void utils_print_help();
+
+const char* convert_general_error(int error);
 
 #endif //utils_h
