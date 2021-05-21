@@ -46,7 +46,11 @@ static void print_help()
     printf("options:\n");
     printf("\n");
     printf("%s: help\n", HELP);
-    printf("%s: verbose, verbose: %d\n", VERBOSE, VERBOSE_DEF);
+    printf("%s: verbose, default: %d\n", VERBOSE, VERBOSE_DEF);
+    printf("%s: email user, default: %s\n", EMAIL_USER, EMAIL_USER_DEF);
+    printf("%s: email secret, default: %s\n", EMAIL_SECRET, EMAIL_SECRET_DEF);
+    printf("%s: smtp url, default: %s\n", EMAIL_SMTP, EMAIL_SMTP_DEF);
+    printf("%s: email to, default: %s\n", EMAIL_TO, EMAIL_TO_DEF);
     exit(0);
 }
 
@@ -54,21 +58,25 @@ static int main_function()
 {
     struct app_state_t app;
     memset(&app, 0, sizeof(struct app_state_t));
+    app.verbose = utils_get_int(VERBOSE, VERBOSE_DEF);
+    app.email_user = utils_get_str(EMAIL_USER, EMAIL_USER_DEF);
+    app.email_secret = utils_get_str(EMAIL_SECRET, EMAIL_SECRET_DEF);
+    app.email_smtp = utils_get_str(EMAIL_SMTP, EMAIL_SMTP_DEF);
+    app.email_to = utils_get_str(EMAIL_TO, EMAIL_TO_DEF);
 
-    CALL(http_init(), exit);
-
-    strcpy(app.file_path, get_tmp_dir());
+    strcpy(app.file_path, file_get_tmp());
     strcat(app.file_path, TMP_FILE);
-    int read;
-    CALL(read_file(app.file_path, app.file_data, sizeof(app.file_data), &read), cleanup);
-
+    CALL(http_init(), exit);
+    CALL(file_read(app.file_path, app.file_data, sizeof(app.file_data), NULL), cleanup);
     CALL(http_get_ip(&app), cleanup);
+    if (strcmp(app.file_data, app.ip)) {
+        CALL(http_send_email(&app), cleanup);
+        CALL(file_write(app.file_path, app.ip, strlen(app.ip), NULL), cleanup);
+    }
 
-    int res = strcmp(app.file_data, app.ip); 
-    DEBUG_STRING("app.ip", app.ip);
-    DEBUG_STRING("app.file_path", app.file_path);
-    DEBUG_STRING("app.file_data", app.file_data);
-    DEBUG_INT("strcmp", res);
+    DEBUG_STR("app.ip", app.ip);
+    DEBUG_STR("app.file_path", app.file_path);
+    DEBUG_STR("app.file_data", app.file_data);
 
 cleanup:
     http_cleanup();

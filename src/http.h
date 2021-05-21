@@ -27,6 +27,8 @@
 
 int http_init();
 void http_cleanup();
-int http_get_ip(struct app_state_t *app);
 
-#endif // main_h
+int http_get_ip(struct app_state_t *app);
+int http_send_email(struct app_state_t *app);
+
+#endif // http_h

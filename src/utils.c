@@ -28,7 +28,7 @@
 KHASH_MAP_INIT_STR(map_str, char *)
 extern khash_t(map_str) *h;
 
-void utils_parse_args(int argc, char** argv)
+void utils_parse_args(int argc, char* argv[])
 {
     int ret;
     unsigned k;
@@ -41,7 +41,47 @@ void utils_parse_args(int argc, char** argv)
     }
 }
 
-const char* get_tmp_dir()
+const char *utils_get_str(const char name[], const char def_value[])
+{
+    unsigned k = kh_get(map_str, h, name);
+    if (k != kh_end(h)) {
+        return kh_val(h, k);
+    }
+    return def_value;
+}
+
+int utils_get_int(const char name[], int def_value)
+{
+    unsigned k = kh_get(map_str, h, name);
+    if (k != kh_end(h)) {
+        const char* value = kh_val(h, k);
+        return atoi(value);
+    }
+    return def_value;
+}
+
+int utils_get_time(char buffer[], int buffer_size)
+{
+    time_t t = time(NULL);
+    struct tm *tm = localtime(&t);
+    return strftime(buffer, buffer_size, "%a, %d %b %Y %H:%M:%S %z", tm);
+}
+
+
+int utils_get_uuid(char buffer[], int buffer_size)
+{
+    uuid_t binuuid;
+    uuid_generate_random(binuuid);
+
+    ASSERT_INT(buffer_size, <, 37, error);
+    uuid_unparse_lower(binuuid, buffer);
+
+    return 0;
+error:
+    return EAGAIN;
+}
+
+const char* file_get_tmp()
 {
     const char *tmp = getenv(TMPVAR1);
     if (tmp == NULL)
@@ -51,24 +91,39 @@ const char* get_tmp_dir()
     return (tmp == NULL)? TMPDEF: tmp;
 }
 
-int read_file(const char *path, char *buffer, int buffer_size, size_t *read)
+int file_read(const char path[], char buffer[], int buffer_size, int *read)
 {
     FILE *fstream = fopen(path, "a+");
-    ASSERT_POINTER(fstream, ==, NULL, error)
+    ASSERT_PTR(fstream, ==, NULL, error)
 
-    size_t read_size = fread(buffer, 1, buffer_size, fstream);
-    if (read_size < buffer_size)
-        buffer[read_size] = 0;
+    size_t t = fread(buffer, 1, buffer_size, fstream);
+    if (t < buffer_size)
+        buffer[t] = 0;
     else
         buffer[buffer_size - 1] = 0;
 
     if (read != NULL)
-        *read = read_size;
+        *read = t;
 
     CALL(fclose(fstream), error);
     return 0;
 
 error:
     return errno;
+}
 
+int file_write(const char path[], char buffer[], int buffer_size, int *written)
+{
+    FILE *fstream = fopen(path, "w");
+    ASSERT_PTR(fstream, ==, NULL, error)
+
+    size_t t = fwrite(buffer, 1, buffer_size, fstream);
+    if (written != NULL)
+        *written = t;
+
+    CALL(fclose(fstream), error);
+    return 0;
+
+error:
+    return errno;
 }

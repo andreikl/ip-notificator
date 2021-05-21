@@ -1,23 +1,35 @@
 #ifndef main_h
 #define main_h
 
-#define APP_NAME "ip-nitificator\0"
+#define APP_NAME "ip-nitificator"
 #define HELP "--help"
 #define VERBOSE "-d"
-#define VERBOSE_DEF 1
+#define VERBOSE_DEF 0
+#define EMAIL_USER "-u"
+#define EMAIL_USER_DEF "user"
+#define EMAIL_SECRET "-p"
+#define EMAIL_SECRET_DEF "password"
+#define EMAIL_SMTP "-s"
+#define EMAIL_SMTP_DEF "smtps://smtp.gmail.com"
+#define EMAIL_TO "-t"
+#define EMAIL_TO_DEF ""
 
 #define MAX_STRING 256
-#define TMP_FILE "/ip-notificator.txt"
-#define TMPVAR1 "TMPDIR\0"
-#define TMPVAR2 "TEMP\0"
-#define TMPVAR3 "TMP\0"
-#define TMPDEF "/var/tmp\0"
+#define MAX_DATA 1024
 
-#include <sysexits.h>// exit codes
-#include <signal.h>  // SIGUSR1
-#include <stdio.h>   // fprintf
-#include <errno.h>   // error codes
-#include <string.h>   // memcpy
+#define TMP_FILE "/ip-notificator.txt"
+#define TMPVAR1 "TMPDIR"
+#define TMPVAR2 "TEMP"
+#define TMPVAR3 "TMP"
+#define TMPDEF "/var/tmp"
+
+#include <sysexits.h>  // exit codes
+#include <signal.h>    // SIGUSR1
+#include <stdio.h>     // fprintf
+#include <errno.h>     // error codes
+#include <string.h>    // memcpy
+#include <time.h>      // time_t
+#include <uuid/uuid.h> // uuid
 
 
 #define GET_3RD_ARG(arg1, arg2, arg3, ...) arg3
@@ -31,7 +43,7 @@
     } \
 }
 
-#define ASSERT_LONG(value, condition, expectation, error) \
+#define ASSERT_LNG(value, condition, expectation, error) \
 { \
     if (value condition expectation) { \
         fprintf(stderr, "ERROR: assert "#value"(%ld) "#condition" "#expectation"(%ld)\n%s:%d - %s\n", \
@@ -40,7 +52,7 @@
     } \
 }
 
-#define ASSERT_POINTER(value, condition, expectation, error) \
+#define ASSERT_PTR(value, condition, expectation, error) \
 { \
     if (value condition expectation) { \
         fprintf(stderr, "ERROR: assert "#value"(%p) "#condition" "#expectation"(%p)\n%s:%d - %s\n", \
@@ -63,7 +75,7 @@
         value); \
 }
 
-#define DEBUG_STRING(text, value) \
+#define DEBUG_STR(text, value) \
 { \
     fprintf(stderr, "INFO: %s, "#text": %s\n", \
         __FUNCTION__, \
@@ -99,10 +111,18 @@
 
 
 struct app_state_t {
+    int verbose;
+
     char ip[MAX_STRING];
     char file_path[MAX_STRING];
     char file_data[MAX_STRING];
-
+    const char *email_user;
+    const char *email_secret;
+    const char *email_smtp;
+    const char *email_to;
+    int email_read;
+    char buffer[MAX_STRING];
+    char email_data[MAX_DATA];
 };
 
 #endif // main_h
