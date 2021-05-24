@@ -14,10 +14,11 @@ SRCDIR = ./src/
 #CC = arm-linux-gnueabihf-gcc
 #-mcpu=arm6 -mfpu=vfp
 CC = gcc
+
 LDFLAGS = -lm `pkg-config --libs uuid`
 COMMON = -Iexternal/klib -Isrc/ `pkg-config --cflags uuid`
 #-D_POSIX_C_SOURCE=199309L fixes CLOCK_REALTIME error on pi zero 
-CFLAGS = -pthread -O3 -fPIC -Wall -Wno-implicit-function-declaration -Wno-unused-function -DNDEBUG -std=c17 -D_POSIX_C_SOURCE=199309L
+CFLAGS = -pthread -O3 -fPIC -Wall -Wno-implicit-function-declaration -Wno-unused-function -DNDEBUG -std=c11 -D_POSIX_C_SOURCE=199309L
 OBJ = utils.o main.o
 
 ifeq ($(LIBCURL), 1) 

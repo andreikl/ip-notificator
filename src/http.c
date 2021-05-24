@@ -42,9 +42,9 @@ void http_cleanup()
     curl_global_cleanup();
 }
 
-static int write_data(void *ptr, int size, int nmemb, char* data) {
-    ASSERT_INT(size * nmemb, >, MAX_STRING, exit);
-    //DEBUG_INT("write_data nmemb", nmemb);
+static size_t write_data(void *ptr, size_t size, size_t nmemb, char* data) {
+    ASSERT_LNG(size * nmemb, >, MAX_STRING, exit);
+    //DEBUG_LNG("write_data nmemb", nmemb);
     memcpy(data, ptr, size * nmemb);
     return size * nmemb;
 exit:
@@ -59,7 +59,6 @@ int http_get_ip(struct app_state_t *app)
     curl_easy_setopt(curl, CURLOPT_URL, EXTERNAL_IP_PROVIDER);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, app->ip);
     //char header[MAX_STRING];
@@ -67,9 +66,9 @@ int http_get_ip(struct app_state_t *app)
 
     CURL_CALL(curl_easy_perform(curl), cleanup);
 
-    unsigned response_code;
+    long response_code;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-    ASSERT_INT(response_code, !=, 200, cleanup);
+    ASSERT_LNG(response_code, !=, 200, cleanup);
 
     curl_easy_cleanup(curl);
     return 0;
