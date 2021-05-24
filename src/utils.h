@@ -10,7 +10,7 @@ int utils_get_time(char buffer[], int buffer_size);
 int utils_get_uuid(char buffer[], int buffer_size);
 
 const char *file_get_tmp();
-int file_read(const char path[], char buffer[], int buffer_size, int *read);
-int file_write(const char path[], char buffer[], int buffer_size, int *written);
+int file_read(const char path[], char buffer[], size_t buffer_size, size_t *read);
+int file_write(const char path[], char buffer[], size_t buffer_size, size_t *written);
 
 #endif //utils_h

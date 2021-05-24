@@ -81,15 +81,15 @@ cleanup:
     return EAGAIN;
 }
 
-static int read_data(char *ptr, int size, int nmemb, void *userp)
+static size_t read_data(char *ptr, size_t size, size_t nmemb, void *userp)
 {
     struct app_state_t *app = (struct app_state_t *)userp;
 
-    int len = strlen(app->email_data);
+    size_t len = strlen(app->email_data);
     if (app->email_read >= len) { //all data has been copied
         return 0;
     }
-    ASSERT_INT(size * nmemb, <, len, exit);
+    ASSERT_LNG(size * nmemb, <, len, exit);
     if (app->verbose) {
         DEBUG_STR("email_data", app->email_data);
     }
@@ -150,10 +150,10 @@ int http_send_email(struct app_state_t *app)
 
     CURL_CALL(curl_easy_perform(curl), cleanup);
 
-    unsigned response_code;
+    long response_code;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-    ASSERT_INT(response_code, <, 200, cleanup);
-    ASSERT_INT(response_code, >=, 300, cleanup);
+    ASSERT_LNG(response_code, <, 200, cleanup);
+    ASSERT_LNG(response_code, >=, 300, cleanup);
     res = 0;
 
 cleanup:

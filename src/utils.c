@@ -91,7 +91,7 @@ const char* file_get_tmp()
     return (tmp == NULL)? TMPDEF: tmp;
 }
 
-int file_read(const char path[], char buffer[], int buffer_size, int *read)
+int file_read(const char path[], char buffer[], size_t buffer_size, size_t *read)
 {
     FILE *fstream = fopen(path, "a+");
     ASSERT_PTR(fstream, ==, NULL, error)
@@ -112,7 +112,7 @@ error:
     return errno;
 }
 
-int file_write(const char path[], char buffer[], int buffer_size, int *written)
+int file_write(const char path[], char buffer[], size_t buffer_size, size_t *written)
 {
     FILE *fstream = fopen(path, "w");
     ASSERT_PTR(fstream, ==, NULL, error)

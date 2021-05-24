@@ -120,7 +120,7 @@ struct app_state_t {
     const char *email_secret;
     const char *email_smtp;
     const char *email_to;
-    int email_read;
+    size_t email_read;
     char buffer[MAX_STRING];
     char email_data[MAX_DATA];
 };

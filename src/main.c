@@ -63,20 +63,13 @@ static int main_function()
     app.email_secret = utils_get_str(EMAIL_SECRET, EMAIL_SECRET_DEF);
     app.email_smtp = utils_get_str(EMAIL_SMTP, EMAIL_SMTP_DEF);
     app.email_to = utils_get_str(EMAIL_TO, EMAIL_TO_DEF);
-    DEBUG_STR("http_init", "http_init")
     strcpy(app.file_path, file_get_tmp());
     strcat(app.file_path, TMP_FILE);
 
     CALL(http_init(), exit);
-    DEBUG_STR("file_read", "file_read")
     CALL(file_read(app.file_path, app.file_data, sizeof(app.file_data), NULL), cleanup);
-    DEBUG_STR("http_get", "http_get")
     CALL(http_get_ip(&app), cleanup);
-    DEBUG_STR("test", "test");
-    DEBUG_STR("file_data", app.file_data);
-    DEBUG_STR("app.ip", app.ip);
     if (strcmp(app.file_data, app.ip)) {
-    DEBUG_STR("http_send_email", "http_send_email")
         CALL(http_send_email(&app), cleanup);
         CALL(file_write(app.file_path, app.ip, strlen(app.ip), NULL), cleanup);
     }
