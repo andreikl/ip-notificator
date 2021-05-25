@@ -3,6 +3,10 @@ LIBCURL = 1
 EXEC = ip-notificator
 OBJDIR = ./obj/
 SRCDIR = ./src/
+ifeq ($(PREFIX),)
+    PREFIX = /usr/local
+endif
+
 #                                                          execution time|code size|memory usage|compile time
 #-O0 		optimization for compilation time (default) 		+ 	+ 	- 	-
 #-O1 or -O 	optimization for code size and execution time 		- 	- 	+ 	+
@@ -40,7 +44,16 @@ $(OBJDIR)%.o: $(SRCDIR)%.c
 obj:
 	mkdir -p obj
 
-.PHONY: clean
+.PHONY: install
+install: $(EXEC)
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -m 644 $(EXEC) $(DESTDIR)$(PREFIX)/bin
 
+.PHONY: uninstall
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/$(EXEC)
+
+
+.PHONY: clean
 clean:
 	rm -rf $(OBJDIR)
