@@ -47,7 +47,7 @@ obj:
 .PHONY: install
 install: $(EXEC)
 	install -d $(DESTDIR)$(PREFIX)/bin
-	install -m 644 $(EXEC) $(DESTDIR)$(PREFIX)/bin
+	install -m 111 $(EXEC) $(DESTDIR)$(PREFIX)/bin
 
 .PHONY: uninstall
 uninstall:
